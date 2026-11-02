@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>碰撞音效试听 · 选一个</title>
+  <style>
+    body { background: #14100c; color: #e8e2d5; font-family: "PingFang SC", sans-serif; display: flex; flex-direction: column; align-items: center; padding-top: 60px; }
+    h1 { font-weight: 500; letter-spacing: .2em; font-size: 20px; }
+    .card { background: rgba(255,255,255,.05); border: 1px solid rgba(232,226,213,.15); border-radius: 12px; padding: 18px 26px; margin: 12px; width: 420px; }
+    .card h2 { font-size: 15px; margin: 0 0 4px; color: #d8b96a; }
+    .card p { font-size: 11.5px; opacity: .6; margin: 0 0 12px; line-height: 1.7; }
+    button { background: #d8b96a; border: none; color: #17120c; font-size: 14px; padding: 8px 22px; border-radius: 100px; cursor: pointer; letter-spacing: .1em; }
+    button:active { transform: scale(.96); }
+    .tip { margin-top: 30px; font-size: 12px; opacity: .55; }
+  </style>
+</head>
+<body>
+  <h1>球-球碰撞音效 · 第二轮四选一</h1>
+  <div class="card">
+    <h2>E · 实战击球 1</h2>
+    <p>BILLIARD pool shots(Freesound 350918,CC0)——真实球房录制,低频有肉</p>
+    <button onclick="play('E-poolshot-body-1')">▶ 试听</button>
+  </div>
+  <div class="card">
+    <h2>F · 实战击球 2</h2>
+    <p>同素材另一击——力度更足,尾音更长</p>
+    <button onclick="play('F-poolshot-body-2')">▶ 试听</button>
+  </div>
+  <div class="card">
+    <h2>G · break 碎裂短切</h2>
+    <p>你喜欢的开球声切出的短版——脆和肉兼顾(游戏里可再提速)</p>
+    <button onclick="play('G-break-crack-short')">▶ 试听</button>
+  </div>
+  <div class="card">
+    <h2>H · 保龄球瓶碰击</h2>
+    <p>Single bowling pin knock(Freesound 499788,CC0)——更亮更跳的反方向</p>
+    <button onclick="play('H-pin-knock')">▶ 试听</button>
+  </div>
+  <p class="tip">第一轮全部淘汰后的新阵容。连续多点几下感受差异,告诉我选哪个字母;如果 G 的方向对但想更脆/更肉,也说一声,我按方向再切。</p>
+  <script>
+    let ctx;
+    async function play(name) {
+      ctx = ctx || new AudioContext();
+      const buf = await (await fetch(`assets/sfx/candidates/${name}.mp3`)).arrayBuffer();
+      const audio = await ctx.decodeAudioData(buf);
+      const src = ctx.createBufferSource();
+      src.buffer = audio;
+      const g = ctx.createGain();
+      g.gain.value = 0.8;
+      src.connect(g).connect(ctx.destination);
+      src.start();
+    }
+  </script>
+</body>
+</html>

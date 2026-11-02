@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>九号俱乐部 · 第一人称物理台球</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=ZCOOL+QingKe+HuangYou&display=swap" rel="stylesheet">
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "./node_modules/three/build/three.module.js",
+      "three/addons/": "./node_modules/three/examples/jsm/",
+      "@dimforge/rapier3d-compat": "./node_modules/@dimforge/rapier3d-compat/dist/rapier.mjs"
+    }
+  }
+  </script>
+</head>
+<body>
+  <div id="app"></div>
+
+  <div id="hud">
+    <div id="topbar">
+      <span id="mode">行走模式</span>
+      <span id="hint"></span>
+    </div>
+    <div id="meta">
+      <span id="shots">击球 0</span>
+      <span id="potted">进球 0</span>
+      <span id="fps"></span>
+    </div>
+    <div id="scoreboard">
+      <div id="p1" class="pcard">
+        <div class="pc-head"><span class="pc-name"></span><span class="pc-group"></span></div>
+        <div class="pc-balls"></div>
+      </div>
+      <span class="vs">VS</span>
+      <div id="p2" class="pcard">
+        <div class="pc-head"><span class="pc-name"></span><span class="pc-group"></span></div>
+        <div class="pc-balls"></div>
+      </div>
+    </div>
+    <div id="crosshair"></div>
+    <div id="power-wrap"><div id="power"></div></div>
+    <div id="aim-ui">
+      <div id="spin-wrap">
+        <canvas id="spinpad" width="72" height="72"></canvas>
+        <div class="spin-label">杆法</div>
+      </div>
+    </div>
+    <div id="toast"></div>
+    <div id="bar-ui"></div>
+    <div id="darts-ui">
+      <div id="darts-slots">
+        <span class="dart-slot" id="ds0"><i>·</i><b></b></span>
+        <span class="dart-slot" id="ds1"><i>·</i><b></b></span>
+        <span class="dart-slot" id="ds2"><i>·</i><b></b></span>
+      </div>
+      <div id="darts-ledger">
+        <span id="darts-total"></span>
+        <span id="darts-best"></span>
+      </div>
+    </div>
+    <div id="streak">
+      <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 10.941c2.333 -3.308 .167 -7.823 -1 -8.941c0 3.395 -2.235 5.299 -3.667 6.706c-1.43 1.408 -2.333 3.621 -2.333 5.588c0 3.704 3.134 6.706 7 6.706s7 -3.002 7 -6.706c0 -1.712 -1.232 -4.403 -2.333 -5.588c-2.084 3.353 -3.257 3.353 -4.667 2.235"/></svg>
+      <span class="streak-text"></span>
+    </div>
+    <div id="badge"><div class="b-title"></div><div class="b-metric"></div></div>
+    <div id="big-badge">
+      <svg class="ic trophy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21l8 0"/><path d="M12 17l0 4"/><path d="M7 4l10 0"/><path d="M17 4v8a5 5 0 0 1 -10 0v-8"/><path d="M5 9m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0"/><path d="M19 9m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0"/></svg>
+      <div class="b-title"></div><div class="b-metric"></div>
+    </div>
+    <div id="replay-bar">
+      <button id="rp-play" class="ic-btn" aria-label="播放/暂停">
+        <svg class="ic ic-pause" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 5m0 1a1 1 0 0 1 1 -1h2a1 1 0 0 1 1 1v12a1 1 0 0 1 -1 1h-2a1 1 0 0 1 -1 -1z"/><path d="M14 5m0 1a1 1 0 0 1 1 -1h2a1 1 0 0 1 1 1v12a1 1 0 0 1 -1 1h-2a1 1 0 0 1 -1 -1z"/></svg>
+        <svg class="ic ic-play" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" hidden><path d="M7 4v16l13 -8z"/></svg>
+      </button>
+      <input id="rp-time" type="range" min="0" max="0" step="1" value="0">
+      <select id="rp-speed">
+        <option value="0.1">0.1×</option>
+        <option value="0.25">0.25×</option>
+        <option value="0.5">0.5×</option>
+        <option value="1" selected>1×</option>
+      </select>
+      <span id="rp-label"></span>
+      <button id="rp-close" class="ic-btn" aria-label="关闭">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6l-12 12"/><path d="M6 6l12 12"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <div id="overlay">
+    <div class="ov-left pre">
+      <h1 id="ov-title">九号俱乐部</h1>
+      <p id="ov-sub">CLUB No.9 · 第一人称物理台球</p>
+      <p class="flavor" id="ov-flavor">灯已点上,球已摆好。<br>今晚谁开球?</p>
+      <button id="btn-start" class="menu-btn">开始游戏</button>
+    </div>
+    <button class="ov-link ov-bl pre" id="ov-controls-link">
+      <span class="ov-link-ic">⚠</span><span id="controls-link-text">操作指南</span>
+    </button>
+    <div class="ov-br pre">
+      <button class="ov-link" id="ov-gear"><span class="ov-link-ic">⚙</span><span id="gear-text">设置</span></button>
+      <button class="ov-link" id="ov-mute"><span class="kbd-mini">M</span><span id="mute-text">静音</span></button>
+    </div>
+    <div id="side-panel" hidden>
+      <div id="panel-settings">
+        <h3 id="panel-title">设置</h3>
+        <div class="pr">
+          <span class="pr-label" id="set-lang-label">语言</span>
+          <select id="lang-select">
+            <option value="zh">简体中文</option>
+            <option value="en">English</option>
+          </select>
+        </div>
+        <div class="pr">
+          <span class="pr-label" id="set-potcam-label">进球特写</span>
+          <span class="pr-right">
+            <span class="toggle" id="potcam-toggle"><i></i></span>
+            <span class="pr-state" id="potcam-state">开启</span>
+          </span>
+        </div>
+        <div class="pr">
+          <span class="pr-label" id="set-guides-label">辅助瞄准线</span>
+          <span class="pr-right">
+            <span class="toggle" id="guides-toggle"><i></i></span>
+            <span class="pr-state" id="guides-state">开启</span>
+          </span>
+        </div>
+        <button class="pr link" id="about-open">
+          <span class="pr-label-col"><span id="about-label">关于</span><small id="about-sub">开源材质与许可</small></span>
+          <span class="chev">›</span>
+        </button>
+        <div class="pr foot"><span class="kbd-mini">ESC</span><span class="back-text">返回</span></div>
+      </div>
+      <div id="panel-about" hidden>
+        <h3 id="about-title">关于</h3>
+        <div id="about-list"></div>
+        <button class="pr link foot" id="about-back"><span class="kbd-mini">‹</span><span class="back-text" id="about-back-text">返回设置</span></button>
+      </div>
+    </div>
+    <div id="controls-panel" hidden>
+      <h3 id="controls-title">操作指南</h3>
+      <div class="keys-row" id="keys-1"></div>
+      <div class="keys-row" id="keys-2"></div>
+      <div class="keys-row" id="keys-3"></div>
+      <div class="pr foot"><span class="kbd-mini">ESC</span><span class="back-text">返回</span></div>
+    </div>
+    <p class="touch-note" id="touch-note" hidden></p>
+  </div>
+
+  <script type="module" src="src/main.js"></script>
+  <div id="veil"></div>
+</body>
+</html>

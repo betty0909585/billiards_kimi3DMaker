@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>库边音效试听 · 选一个</title>
+  <style>
+    body { background: #14100c; color: #e8e2d5; font-family: "PingFang SC", sans-serif; display: flex; flex-direction: column; align-items: center; padding-top: 48px; }
+    h1 { font-weight: 500; letter-spacing: .2em; font-size: 20px; }
+    .row { display: flex; flex-wrap: wrap; justify-content: center; max-width: 960px; }
+    .card { background: rgba(255,255,255,.05); border: 1px solid rgba(232,226,213,.15); border-radius: 12px; padding: 16px 22px; margin: 10px; width: 400px; }
+    .card h2 { font-size: 15px; margin: 0 0 4px; color: #d8b96a; }
+    .card p { font-size: 11.5px; opacity: .6; margin: 0 0 12px; line-height: 1.7; }
+    button { background: #d8b96a; border: none; color: #17120c; font-size: 14px; padding: 8px 22px; border-radius: 100px; cursor: pointer; letter-spacing: .1em; }
+    button:active { transform: scale(.96); }
+    .cur { border-color: #d8b96a; }
+    .tip { margin: 24px 0 40px; font-size: 12px; opacity: .55; max-width: 700px; text-align: center; line-height: 1.8; }
+  </style>
+</head>
+<body>
+  <h1>库边音效 · 八选一</h1>
+  <div class="row" id="row"></div>
+  <p class="tip">R0 是现役对照组。R3/R4/R5 是从长录音里按能量峰值切出的两段,哪个瞬态顺耳选哪个。连续多点几下对比,告诉我编号;方向对但想更脆/更闷也可以再调。</p>
+  <script>
+    const CANDS = [
+      ['R0-current-cushion', 'R0 · 现役库边(对照)', 'Freesound 443067(CC0)——现在游戏里这条,0.85 倍速播放'],
+      ['R1-rail-bounce-nokia', 'R1 · rail 反弹实录', 'Freesound 42364 pool-ball-bounce-off-rail(CC0)——真实球台库边,手机实录,0.79s'],
+      ['R2-impact-organic', 'R2 · Impact Organic', 'Freesound 467581 Billiard Impact Organic(CC-BY)——短促有肉,0.53s'],
+      ['R3a-kvv-strike-01', 'R3a · KVV 击球 A', 'Freesound 830221 Billiard Cue Ball Strike(CC-BY)——峰值段 1'],
+      ['R3b-kvv-strike-02', 'R3b · KVV 击球 B', '同素材峰值段 2——力度更足'],
+      ['R4a-biljart-01', 'R4a · biljart A', 'Freesound 332472 biljart(CC0)——峰值段 1'],
+      ['R4b-biljart-02', 'R4b · biljart B', '同素材峰值段 2'],
+      ['R5a-rzshi-01', 'R5a · billiard ball A', 'Freesound 268767 about_billiard_ball(CC-BY)——峰值段 1'],
+      ['R5b-rzshi-02', 'R5b · billiard ball B', '同素材峰值段 2'],
+    ];
+    const ext = (n) => (n.startsWith('R3') || n.startsWith('R4') || n.startsWith('R5')) ? 'wav' : 'mp3';
+    const row = document.getElementById('row');
+    for (const [name, title, desc] of CANDS) {
+      const d = document.createElement('div');
+      d.className = 'card' + (name.startsWith('R0') ? ' cur' : '');
+      d.innerHTML = `<h2>${title}</h2><p>${desc}</p><button>▶ 试听</button>`;
+      d.querySelector('button').onclick = () => play(name);
+      row.appendChild(d);
+    }
+    let ctx;
+    const bufs = new Map();
+    async function play(name) {
+      ctx = ctx || new AudioContext();
+      if (!bufs.has(name)) {
+        const buf = await (await fetch(`assets/sfx/candidates/${name}.${ext(name)}`)).arrayBuffer();
+        bufs.set(name, await ctx.decodeAudioData(buf));
+      }
+      const src = ctx.createBufferSource();
+      src.buffer = bufs.get(name);
+      src.playbackRate.value = 0.85; // 与游戏内一致
+      const g = ctx.createGain();
+      g.gain.value = 0.8;
+      src.connect(g).connect(ctx.destination);
+      src.start();
+    }
+  </script>
+</body>
+</html>

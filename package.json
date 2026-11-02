@@ -1,0 +1,21 @@
+{
+  "name": "billiards",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "node test/physics.test.mjs && node test/darts.test.mjs && node test/bargames.test.mjs",
+    "serve": "node serve.mjs"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "@dimforge/rapier3d-compat": "^0.20.0",
+    "three": "^0.185.1"
+  }
+}
